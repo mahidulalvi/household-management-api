@@ -34,6 +34,11 @@ namespace HouseholdManagementWebAPI
                 RequireLowercase = true,
                 RequireUppercase = true,
             };
+
+
+            manager.EmailService = new EmailService();
+
+
             var dataProtectionProvider = options.DataProtectionProvider;
             if (dataProtectionProvider != null)
             {

@@ -8,6 +8,7 @@ using System.Web.Http;
 namespace HouseholdManagementWebAPI.Controllers
 {
     [Authorize]
+    [RoutePrefix("api/v1")]
     public class ValuesController : ApiController
     {
         // GET api/values

@@ -152,7 +152,7 @@ namespace HouseholdManagementWebAPI.Controllers
 
             return Ok();
         }
-
+        
         // POST api/Account/AddExternalLogin
         [Route("AddExternalLogin")]
         public async Task<IHttpActionResult> AddExternalLogin(AddExternalLoginBindingModel model)
@@ -372,6 +372,67 @@ namespace HouseholdManagementWebAPI.Controllers
             }
             return Ok();
         }
+
+
+        // POST api/Account/ResetPassword
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("ResetPassword", Name = "ForgetPasswordResetUrl")]
+        public async Task<IHttpActionResult> ForgetPasswordReset(ForgotPasswordResetBindingModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }            
+
+            var user = await UserManager.FindByNameAsync(model.Email);
+            if (user == null)
+            {
+                // Don't reveal that the user does not exist
+                return Ok();
+            }
+
+            IdentityResult result = await UserManager.ResetPasswordAsync(user.Id, model.Code, model.Password);
+
+            if (result.Succeeded)
+            {
+                return Ok();
+            }
+
+            return Ok();
+        }
+
+
+        [HttpPost]
+        [AllowAnonymous]
+        //[ValidateAntiForgeryToken]
+        [Route("ForgotPassword")]
+        public async Task<IHttpActionResult> ForgotPassword(ForgotPasswordBindingModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await UserManager.FindByNameAsync(model.Email);
+                if (user == null || !(await UserManager.IsEmailConfirmedAsync(user.Id)))
+                {
+                    // Don't reveal that the user does not exist or is not confirmed
+
+                    //Returning Ok() so unauthorized persons cannot guess if it is working or not
+                    return Ok();
+                }
+
+                // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
+                // Send an email with this link
+                string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
+                //var callbackUrl = Url.Link("ResetPasswordUrl", new { code = code });
+                await UserManager.SendEmailAsync(user.Id, "Reset Password", "Please reset your password by clicking <a href=\"" + $"<< {code} >>" + "\">here</a>");
+                return Ok();
+            }
+
+            // If we got this far, something failed, redisplay form
+            return Ok();
+        }
+
+
 
         protected override void Dispose(bool disposing)
         {
