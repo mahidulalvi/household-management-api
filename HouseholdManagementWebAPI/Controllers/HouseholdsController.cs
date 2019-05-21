@@ -31,6 +31,7 @@ namespace HouseholdManagementWebAPI.Controllers
         //}
 
         // GET: api/Households/5
+        [HttpGet]
         [Route("{id}", Name = "GetHouseholdById")]
         public IHttpActionResult Get(string id)
         {
@@ -53,9 +54,10 @@ namespace HouseholdManagementWebAPI.Controllers
         }
 
         // POST: api/Households
+        [HttpPost]
         public IHttpActionResult Post(HouseholdBindingModel formdata)
         {
-            if (formdata == null)
+            if (formdata == null || !ModelState.IsValid)
             {
                 return BadRequest("Please provide the details of the household");
             }
@@ -98,10 +100,12 @@ namespace HouseholdManagementWebAPI.Controllers
 
         }
 
-        // PUT: api/Households/5        
+        // PUT: api/Households/5
+        [HttpPut]
+        [Route("{id}")]
         public IHttpActionResult Put(string id, HouseholdBindingModel formdata)
         {
-            if(id == null || formdata == null)
+            if(id == null || formdata == null || !ModelState.IsValid)
             {
                 return BadRequest("Please provide all the details");
             }
@@ -142,6 +146,8 @@ namespace HouseholdManagementWebAPI.Controllers
         }
 
         // DELETE: api/Households/5
+        [HttpDelete]
+        [Route("{id}")]
         public IHttpActionResult Delete(string id)
         {
             if(id == null)

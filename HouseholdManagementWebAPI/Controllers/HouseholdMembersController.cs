@@ -39,14 +39,8 @@ namespace HouseholdManagementWebAPI.Controllers
             DbContext = new ApplicationDbContext();
         }
 
-
-        // GET: api/HouseholdMembers        
-        //public IEnumerable<string> Get()
-        //{
-        //    return new string[] { "value1", "value2" };
-        //}
-
-        // GET: api/HouseholdMembers/5
+        
+        [HttpGet]
         [Route("{householdId}")]
         public IHttpActionResult Get(string householdId)
         {
@@ -68,25 +62,10 @@ namespace HouseholdManagementWebAPI.Controllers
                 .ToList();                        
 
             return Ok(result);
-        }
-
-        // POST: api/HouseholdMembers
-        //public void Post([FromBody]string value)
-        //{
-        //}
-
-        // PUT: api/HouseholdMembers/5
-        public void Put(int id, [FromBody]string value)
-        {
-        }
-
-        // DELETE: api/HouseholdMembers/5
-        public void Delete(int id)
-        {
-        }
+        }                        
 
         [HttpPost]
-        [Route("InviteMember/{householdId}")]
+        [Route("{householdId}/InviteMember")]
         public async Task<IHttpActionResult> InviteMemberByEmail(string householdId, InviteHouseholdMemberBindingModel formdata)
         {
             if (householdId == null || formdata == null)
@@ -103,7 +82,7 @@ namespace HouseholdManagementWebAPI.Controllers
                 return NotFound();
             }
 
-            var userToBeEmailed = DbContext.Users.FirstOrDefault(p => p.Email == formdata.Email && p.Id != household.HouseholdOwnerId && !household.HouseholdMembers.Any(r => r.Id == p.Id));
+            var userToBeEmailed = DbContext.Users.FirstOrDefault(p => p.Email == formdata.Email && p.Id !=  currentUserId && !p.JoinedHouseholds.Any(r => r.Id == householdId));
             if (userToBeEmailed == null)
             {
                 return NotFound();
@@ -118,13 +97,13 @@ namespace HouseholdManagementWebAPI.Controllers
             userToBeEmailed.ReceivedHouseholdInvites.Add(invite);
             household.ActiveInvites.Add(invite);
 
-            var inviteBindingModel = Mapper.Map<InviteBindingModel>(invite);
+            //var inviteBindingModel = Mapper.Map<InviteBindingModel>(invite);
 
             DbContext.Invites.Add(invite);
 
             DbContext.SaveChanges();
 
-            await SendEmail(userToBeEmailed.Id, household.Name, currentUser.UserName, "Invite", invite.Id, inviteBindingModel);
+            await SendEmail(userToBeEmailed.Id, household.Name, currentUser.UserName, "Invite", invite.Id);
 
             return Ok();
         }
@@ -140,7 +119,7 @@ namespace HouseholdManagementWebAPI.Controllers
             }
             
             var currentUserId = User.Identity.GetUserId();
-            var currentUser = DbContext.Users.FirstOrDefault(p => p.Id == currentUserId);
+            var currentUser = DbContext.Users.FirstOrDefault(p => p.Id == currentUserId);            
 
             var invite = DbContext.Invites.FirstOrDefault(p => p.Id == inviteId && p.InvitedId ==  currentUserId);
             if (invite == null)
@@ -171,14 +150,13 @@ namespace HouseholdManagementWebAPI.Controllers
 
 
         [Authorize]
-        private async Task<IHttpActionResult> SendEmail(string userId, string householdName, string invitee, string operation, string inviteId, InviteBindingModel formdata)
+        private async Task<IHttpActionResult> SendEmail(string userId, string householdName, string invitee, string operation, string inviteId)
         {
             
             if (operation == "Invite")
-            {
-                //var link = Url.Link("Default", new { controller = "HouseholdMembers", action = "JoinHouseholdFromInvitation" });
+            {                
                 await UserManager.SendEmailAsync(userId, $"Invitation from {invitee}", $"Greetings! {invitee} invited you to the household: {householdName}. Click " +
-                    $"<a href='#'>Here</a> to accept/decline");
+                    $"<a href='#'>Here</a> to accept/decline. This is the id of the invitation {inviteId}");
             }
             else
             {

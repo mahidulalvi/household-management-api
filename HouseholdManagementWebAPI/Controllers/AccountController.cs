@@ -424,7 +424,7 @@ namespace HouseholdManagementWebAPI.Controllers
                 // Send an email with this link
                 string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
                 //var callbackUrl = Url.Link("ResetPasswordUrl", new { code = code });
-                await UserManager.SendEmailAsync(user.Id, "Reset Password", "Please reset your password by clicking <a href=\"" + $"<< {code} >>" + "\">here</a>");
+                await UserManager.SendEmailAsync(user.Id, "Reset Password", "Please reset your password by clicking <a href=\"" + $"\">here {code}</a>");
                 return Ok();
             }
 

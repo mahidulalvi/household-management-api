@@ -51,18 +51,11 @@ namespace HouseholdManagementWebAPI.Controllers
             return Ok(result);
         }
 
-
-        // GET: api/Categories/5
-        //public string Get(int id)
-        //{
-        //    return "value";
-        //}
-
         // POST: api/Categories
         [Route("CreateCategory/{householdId}")]
         public IHttpActionResult Post(string householdId, BindingModelForCreatingCategory formdata)
         {
-            if(formdata == null)
+            if(householdId == null || formdata == null || !ModelState.IsValid)
             {
                 return BadRequest("Please provide all the details");
             }
@@ -99,7 +92,7 @@ namespace HouseholdManagementWebAPI.Controllers
         [Route("EditCategory/{categoryId}")]
         public IHttpActionResult Put(string categoryId, BindingModelForCreatingCategory formdata)
         {
-            if (categoryId == null || formdata == null)
+            if (categoryId == null || formdata == null || !ModelState.IsValid)
             {
                 return BadRequest("Please provide all the details");
             }
