@@ -34,9 +34,7 @@ namespace HouseholdManagementWebAPI.Controllers
                 return BadRequest("Please provide all the details");
             }
 
-            var currentUserId = User.Identity.GetUserId();
-
-            var categoryCount = DbContext.Categories.Count();
+            var currentUserId = User.Identity.GetUserId();            
 
             var result = DbContext.Categories
                 .Where(p => p.HouseholdId == householdId && p.Household.HouseholdMembers.Any(r => r.Id == currentUserId))     
@@ -128,9 +126,7 @@ namespace HouseholdManagementWebAPI.Controllers
             if(category == null)
             {
                 return NotFound();
-            }
-
-            //DbContext.Households.FirstOrDefault(p => p.Categories.Any(r => r.Id == categoryId)).Categories.Remove(category);
+            }            
 
             DbContext.Categories.Remove(category);
 
