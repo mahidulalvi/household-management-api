@@ -67,8 +67,7 @@ namespace HouseholdManagementWebAPI.Controllers
             }
 
 
-            var category = Mapper.Map<Category>(formdata);
-            category.DateCreated = DateTime.Now;
+            var category = Mapper.Map<Category>(formdata);            
 
             category.HouseholdId = householdId;              
 

@@ -60,7 +60,6 @@ namespace HouseholdManagementWebAPI.Controllers
             var currentUser = DbContext.Users.FirstOrDefault(p => p.Id == currentUserId);
 
             var household = Mapper.Map<Household>(formdata);
-            household.DateCreated = DateTime.Now;
             
             household.HouseholdOwnerId = currentUserId;
             household.HouseholdMembers.Add(currentUser);            
@@ -117,6 +116,8 @@ namespace HouseholdManagementWebAPI.Controllers
             household.DateUpdated = DateTime.Now;
 
             DbContext.SaveChanges();
+
+            var result1 = Mapper.Map<HouseholdViewModelForFrontEnd>(household);
 
             var result = new HouseholdViewModelForFrontEnd
             {

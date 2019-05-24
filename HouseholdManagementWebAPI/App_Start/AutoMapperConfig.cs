@@ -22,6 +22,8 @@ namespace HouseholdManagementWebAPI.App_Start
                 config.CreateMap<InviteBindingModel, Invite>().ReverseMap();
                 config.CreateMap<Category, CategoryBindingModel>().ReverseMap();
                 config.CreateMap<BindingModelForCreatingCategory, Category>().ReverseMap();
+                config.CreateMap<BankAccount, BindingModelForCreatingBankAccount>().ReverseMap();
+                config.CreateMap<BankAccountBindingModel, BankAccount>().ReverseMap();
             });
         }
     }

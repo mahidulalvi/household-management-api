@@ -22,12 +22,16 @@ namespace HouseholdManagementWebAPI.Models.Domain
 
         public virtual List<Category> Categories { get; set; }
 
+        public virtual List<BankAccount> BankAccounts { get; set; }
+
         public Household()
         {
             Id = Guid.NewGuid().ToString();
             HouseholdMembers = new List<ApplicationUser>();
             ActiveInvites = new List<Invite>();
             Categories = new List<Category>();
+            BankAccounts = new List<BankAccount>();
+            DateCreated = DateTime.Now;
         }
     }
 }
