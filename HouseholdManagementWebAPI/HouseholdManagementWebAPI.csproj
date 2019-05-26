@@ -222,6 +222,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\HouseholdMembersController.cs" />
     <Compile Include="Controllers\HouseholdsController.cs" />
+    <Compile Include="Controllers\TransactionsController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -229,8 +230,10 @@
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountBindingModels.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Models\BindingModels\AlternativeBindingModelForCreatingTransaction.cs" />
     <Compile Include="Models\BindingModels\BankAccountBindingModel.cs" />
     <Compile Include="Models\BindingModels\BindingModelForCreatingBankAccount.cs" />
+    <Compile Include="Models\BindingModels\BindingModelForCreatingTransaction.cs" />
     <Compile Include="Models\BindingModels\CategoryBindingModel.cs" />
     <Compile Include="Models\BindingModels\BindingModelForCreatingCategory.cs" />
     <Compile Include="Models\BindingModels\HouseholdBindingModel.cs" />
@@ -238,6 +241,7 @@
     <Compile Include="Models\BindingModels\HouseholdViewModelForFrontEnd.cs" />
     <Compile Include="Models\BindingModels\InviteHouseholdMemberBindingModel.cs" />
     <Compile Include="Models\BindingModels\InviteBindingModel.cs" />
+    <Compile Include="Models\BindingModels\TransactionViewModel.cs" />
     <Compile Include="Models\Domain\BankAccount.cs" />
     <Compile Include="Models\Domain\Category.cs" />
     <Compile Include="Models\Domain\Household.cs" />

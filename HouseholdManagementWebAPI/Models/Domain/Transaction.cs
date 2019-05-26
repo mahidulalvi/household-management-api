@@ -10,7 +10,7 @@ namespace HouseholdManagementWebAPI.Models.Domain
         public string Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public DateTime DateTransacted { get; set; }
+        public DateTime Date { get; set; }
         public decimal Amount { get; set; }
         public DateTime DateCreated { get; set; }
         public DateTime? DateUpdated { get; set; }
