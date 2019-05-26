@@ -17,9 +17,6 @@ namespace HouseholdManagementWebAPI.Models.Domain
         public string HouseholdId { get; set; }
         public virtual Household Household { get; set; }
 
-        public string OwnerId { get; set; }
-        public virtual ApplicationUser Owner { get; set; }
-
         public virtual List<Transaction> Transactions { get; set; }
 
         public BankAccount()

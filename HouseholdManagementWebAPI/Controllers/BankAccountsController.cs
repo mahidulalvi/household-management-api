@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using HouseholdManagementWebAPI.Models;
 using HouseholdManagementWebAPI.Models.BindingModels;
 using HouseholdManagementWebAPI.Models.Domain;
@@ -25,9 +26,29 @@ namespace HouseholdManagementWebAPI.Controllers
 
 
         // GET: api/BankAccounts
-        public IEnumerable<string> Get()
+        [HttpGet]
+        [Route("{householdId}")]
+        public IHttpActionResult Get(string householdId)
         {
-            return new string[] { "value1", "value2" };
+            if(householdId == null)
+            {
+                return BadRequest("Please provide all the details");
+            }
+
+            var currentUserId = User.Identity.GetUserId();
+            var currentUser = DbContext.Users.FirstOrDefault(p => p.Id == currentUserId);
+
+            var result = DbContext.BankAccounts
+                .Where(p => p.HouseholdId == householdId && p.Household.HouseholdMembers.Any(r => r.Id == currentUserId))
+                .ProjectTo<BankAccountBindingModel>()
+                .ToList();
+            if(result == null)
+            {
+                return NotFound();
+            }
+
+
+            return Ok(result);
         }
 
         // GET: api/BankAccounts/5
@@ -56,11 +77,9 @@ namespace HouseholdManagementWebAPI.Controllers
 
 
             var bankAccount = Mapper.Map<BankAccount>(formdata);
-            bankAccount.HouseholdId = household.Id;
-            bankAccount.OwnerId = currentUserId;
+            bankAccount.HouseholdId = household.Id;            
 
             household.BankAccounts.Add(bankAccount);
-            currentUser.BankAccounts.Add(bankAccount);
 
             DbContext.BankAccounts.Add(bankAccount);
 
@@ -86,7 +105,7 @@ namespace HouseholdManagementWebAPI.Controllers
             var currentUserId = User.Identity.GetUserId();
             var currentUser = DbContext.Users.FirstOrDefault(p => p.Id == currentUserId);
 
-            var bankAccount = DbContext.BankAccounts.FirstOrDefault(p => p.OwnerId == currentUserId && p.Household.HouseholdOwnerId == currentUserId && p.Id == bankAccountId);
+            var bankAccount = DbContext.BankAccounts.FirstOrDefault(p => p.Household.HouseholdOwnerId == currentUserId && p.Id == bankAccountId);
             if (bankAccount == null)
             {
                 return NotFound();
@@ -98,15 +117,15 @@ namespace HouseholdManagementWebAPI.Controllers
 
             var model = Mapper.Map<BankAccountBindingModel>(bankAccount);
 
-            return Ok(model);
+            return Ok();
         }
 
         // DELETE: api/BankAccounts/5
         [HttpDelete]
-        [Route("bankAccountId")]
+        [Route("{bankAccountId}")]
         public IHttpActionResult Delete(string bankAccountId)
         {
-            if(bankAccountId == null)
+            if (bankAccountId == null)
             {
                 return BadRequest("Please provide all the details");
             }
@@ -114,8 +133,8 @@ namespace HouseholdManagementWebAPI.Controllers
             var currentUserId = User.Identity.GetUserId();
             var currentUser = DbContext.Users.FirstOrDefault(p => p.Id == currentUserId);
 
-            var bankAccount = DbContext.BankAccounts.FirstOrDefault(p => p.Id == bankAccountId);
-            if(bankAccount == null)
+            var bankAccount = DbContext.BankAccounts.FirstOrDefault(p => p.Id == bankAccountId && p.Household.HouseholdOwnerId == currentUserId);
+            if (bankAccount == null)
             {
                 return NotFound();
             }
@@ -126,14 +145,11 @@ namespace HouseholdManagementWebAPI.Controllers
                 return NotFound();
             }
 
-            bankAccount.Transactions.Clear();
-
-            var allTransactions = DbContext.Transactions.Where(p => p.BankAccountId == bankAccountId);
             DbContext.Transactions.RemoveRange(bankAccount.Transactions);
-            foreach(var transaction in allTransactions)
-            {                
-                DbContext.Transactions.Remove(transaction);
-            }
+
+            DbContext.BankAccounts.Remove(bankAccount);
+
+            DbContext.SaveChanges();
 
             return Ok();
         }

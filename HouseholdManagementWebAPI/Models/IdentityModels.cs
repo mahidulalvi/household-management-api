@@ -26,7 +26,7 @@ namespace HouseholdManagementWebAPI.Models
         [InverseProperty(nameof(Invite.Invited))]
         public virtual List<Invite> ReceivedHouseholdInvites { get; set; }
 
-        public virtual List<BankAccount> BankAccounts { get; set; }
+        //public virtual List<BankAccount> BankAccounts { get; set; }
 
         public virtual List<Transaction> Transactions { get; set; }
 
@@ -36,7 +36,6 @@ namespace HouseholdManagementWebAPI.Models
             OwnedHouseholds = new List<Household>();
             SentHouseholdInvites = new List<Invite>();
             ReceivedHouseholdInvites = new List<Invite>();
-            BankAccounts = new List<BankAccount>();
             Transactions = new List<Transaction>();
         }
 

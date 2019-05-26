@@ -15,8 +15,6 @@ namespace HouseholdManagementWebAPI.Models.BindingModels
         public decimal Balance { get; set; }
 
         public string HouseholdId { get; set; }
-        public string HouseholdName { get; set; }
-
-        public string OwnerName { get; set; }
+        public string HouseholdName { get; set; }        
     }
 }
