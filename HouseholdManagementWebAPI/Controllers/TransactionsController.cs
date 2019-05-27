@@ -163,7 +163,7 @@ namespace HouseholdManagementWebAPI.Controllers
             var currentUserId = User.Identity.GetUserId();
             var currentUser = DbContext.Users.FirstOrDefault(p => p.Id == currentUserId);
 
-            var transaction = DbContext.Transactions.FirstOrDefault(p => p.Id == transactionId && (p.TransactionOwnerId == currentUserId || p.BankAccount.Household.HouseholdOwnerId == currentUserId));
+            var transaction = DbContext.Transactions.FirstOrDefault(p => p.Id == transactionId && ((p.TransactionOwnerId == currentUserId && p.BankAccount.Household.HouseholdMembers.Any(r => r.Id == currentUserId)) || p.BankAccount.Household.HouseholdOwnerId == currentUserId));
             if (transaction == null)
             {
                 return NotFound();
@@ -198,7 +198,7 @@ namespace HouseholdManagementWebAPI.Controllers
             var currentUserId = User.Identity.GetUserId();
             var currentUser = DbContext.Users.FirstOrDefault(p => p.Id == currentUserId);
 
-            var transaction = DbContext.Transactions.FirstOrDefault(p => p.Id == transactionId && (p.TransactionOwnerId == currentUserId || p.BankAccount.Household.HouseholdOwnerId == currentUserId));
+            var transaction = DbContext.Transactions.FirstOrDefault(p => p.Id == transactionId && ((p.TransactionOwnerId == currentUserId && p.BankAccount.Household.HouseholdMembers.Any(r => r.Id == currentUserId)) || p.BankAccount.Household.HouseholdOwnerId == currentUserId));
             if (transaction == null)
             {
                 return NotFound();
@@ -239,13 +239,16 @@ namespace HouseholdManagementWebAPI.Controllers
             var currentUserId = User.Identity.GetUserId();
             var currentUser = DbContext.Users.FirstOrDefault(p => p.Id == currentUserId);
 
-            var transaction = DbContext.Transactions.FirstOrDefault(p => p.Id == transactionId && (p.TransactionOwnerId == currentUserId || p.BankAccount.Household.HouseholdOwnerId == currentUserId));
+            var transaction = DbContext.Transactions.FirstOrDefault(p => p.Id == transactionId && ((p.TransactionOwnerId == currentUserId && p.BankAccount.Household.HouseholdMembers.Any(r => r.Id == currentUserId)) || p.BankAccount.Household.HouseholdOwnerId == currentUserId));
             if (transaction == null)
             {
                 return NotFound();
             }
 
-            transaction.BankAccount.Balance -= transaction.Amount;
+            if(transaction.IsTransactionVoid == false)
+            {
+                transaction.BankAccount.Balance -= transaction.Amount;
+            }
 
             DbContext.Transactions.Remove(transaction);
 
