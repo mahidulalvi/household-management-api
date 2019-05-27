@@ -40,18 +40,34 @@ namespace HouseholdManagementWebAPI.Controllers
             return Ok(result);
         }
 
-        // GET: api/Transactions/5
-        public string Get(int id)
+        [HttpGet]
+        [Route("{transactionId}", Name = "GetTransactionById")]
+        public IHttpActionResult GetATransaction(string transactionId)
         {
-            return "value";
+            var currentUserId = User.Identity.GetUserId();
+
+            var transaction = DbContext.Transactions
+                    .FirstOrDefault(p => p.Id == transactionId && p.BankAccount.Household.HouseholdMembers.Any(r => r.Id == currentUserId));
+            if(transaction == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(transaction);
         }
+
+        // GET: api/Transactions/5
+        //public IHttpActionResult(int id)
+        //{
+        //    return "value";
+        //}
 
         // POST: api/Transactions
         [HttpPost]
         [Route("{householdId}/{bankAccountId}")]
-        public IHttpActionResult Post(string bankAccountId, string householdId, BindingModelForCreatingTransaction formdata)
+        public IHttpActionResult Post(string householdId, string bankAccountId, BindingModelForCreatingTransaction formdata)
         {
-            if (bankAccountId == null || householdId == null || formdata == null || !ModelState.IsValid)
+            if (householdId == null || bankAccountId == null || formdata == null || !ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
@@ -73,6 +89,7 @@ namespace HouseholdManagementWebAPI.Controllers
             transaction.IsTransactionVoid = false;
             transaction.TransactionOwnerId = currentUserId;
 
+            bankAccount.Balance += transaction.Amount;
             bankAccount.Transactions.Add(transaction);
             category.Transactions.Add(transaction);
             currentUser.Transactions.Add(transaction);
@@ -82,7 +99,7 @@ namespace HouseholdManagementWebAPI.Controllers
             DbContext.SaveChanges();
 
             var result = Mapper.Map<TransactionViewModel>(transaction);
-            var link = "abc/abc/abc";
+            var link = Url.Link("GetTransactionById", new { transactionId = transaction.Id });
 
             return Created(link, result);
         }
@@ -114,6 +131,7 @@ namespace HouseholdManagementWebAPI.Controllers
             transaction.IsTransactionVoid = false;
             transaction.TransactionOwnerId = currentUserId;
 
+            bankAccount.Balance += transaction.Amount;
             bankAccount.Transactions.Add(transaction);
             category.Transactions.Add(transaction);
             currentUser.Transactions.Add(transaction);
@@ -123,7 +141,7 @@ namespace HouseholdManagementWebAPI.Controllers
             DbContext.SaveChanges();
 
             var result = Mapper.Map<TransactionViewModel>(transaction);
-            var link = "abc/abc/abc";
+            var link = Url.Link("GetTransactionById", new { transactionId = transaction.Id });
 
             return Created(link, result);
         }
@@ -149,14 +167,18 @@ namespace HouseholdManagementWebAPI.Controllers
                 return NotFound();
             }
 
+            transaction.BankAccount.Balance -= transaction.Amount;
+
             Mapper.Map(formdata, transaction);
             transaction.DateUpdated = DateTime.Now;
+
+            transaction.BankAccount.Balance += transaction.Amount;
 
             DbContext.SaveChanges();
 
             var result = Mapper.Map<TransactionViewModel>(transaction);
 
-            var link = "abc/abc/abc";
+            var link = Url.Link("GetTransactionById", new { transactionId = transaction.Id });
 
             return Created(link, result);
         }
@@ -180,14 +202,17 @@ namespace HouseholdManagementWebAPI.Controllers
                 return NotFound();
             }
 
+            transaction.BankAccount.Balance -= transaction.Amount;
+
             transaction.IsTransactionVoid = true;
             transaction.DateUpdated = DateTime.Now;
+            
 
             DbContext.SaveChanges();
 
             var result = Mapper.Map<TransactionViewModel>(transaction);
 
-            var link = "abc/abc/abc";
+            var link = Url.Link("GetTransactionById", new { transactionId = transaction.Id });
 
             return Created(link, result);
         }
@@ -210,6 +235,8 @@ namespace HouseholdManagementWebAPI.Controllers
             {
                 return NotFound();
             }
+
+            transaction.BankAccount.Balance -= transaction.Amount;
 
             DbContext.Transactions.Remove(transaction);
 

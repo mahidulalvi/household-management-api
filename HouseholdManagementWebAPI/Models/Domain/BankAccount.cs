@@ -12,7 +12,7 @@ namespace HouseholdManagementWebAPI.Models.Domain
         public string Description { get; set; }
         public DateTime DateCreated { get; set; }
         public DateTime? DateUpdated { get; set; }
-        public decimal Balance { get; private set; }
+        public decimal Balance { get; set; }
 
         public string HouseholdId { get; set; }
         public virtual Household Household { get; set; }

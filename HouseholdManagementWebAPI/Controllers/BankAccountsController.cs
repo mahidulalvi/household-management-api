@@ -51,19 +51,51 @@ namespace HouseholdManagementWebAPI.Controllers
             return Ok(result);
         }
 
-        // GET: api/BankAccounts/5
-        public string Get(int id)
+        [HttpGet]
+        [Route("{householdId}/{bankAccountId}", Name = "GetBankAccountWithId")]
+        public IHttpActionResult GetBankAccount(string householdId, string bankAccountId)
         {
-            return "value";
+            if (householdId == null || bankAccountId == null)
+            {
+                return BadRequest("Please provide all the details");
+            }
+
+            var currentUserId = User.Identity.GetUserId();
+            var currentUser = DbContext.Users.FirstOrDefault(p => p.Id == currentUserId);
+
+            var bankAccount = DbContext.BankAccounts
+                .FirstOrDefault(p => p.HouseholdId == householdId && p.Id == bankAccountId && p.Household.HouseholdOwnerId == currentUserId);                              
+            if (bankAccount == null)
+            {
+                return NotFound();
+            }
+
+            var result = Mapper.Map<BankAccountBindingModel>(bankAccount);
+
+            return Ok(result);
+        }
+
+        // GET: api/BankAccounts/5
+        [HttpGet]
+        [Route("{bankAccountId}/CalculateAccountBalance")]
+        public IHttpActionResult CalculateAccountBalance(string bankAccountId)
+        {
+            var currentUserId = User.Identity.GetUserId();
+
+            var result = DbContext.Transactions
+                    .Where(p => p.BankAccountId == bankAccountId && p.BankAccount.Household.HouseholdOwnerId == currentUserId && p.IsTransactionVoid == false)
+                    .Sum(p => p.Amount);                    
+
+            return Ok(result);
         }
 
         // POST: api/BankAccounts
         [HttpPost]
         public IHttpActionResult Post(string householdId, BindingModelForCreatingBankAccount formdata)
         {
-            if (householdId == null || !ModelState.Any() || !ModelState.IsValid)
+            if (householdId == null || formdata == null || !ModelState.IsValid)
             {
-                return BadRequest("Please provide all the details");
+                return BadRequest(ModelState);
             }
 
             var currentUserId = User.Identity.GetUserId();
@@ -77,7 +109,7 @@ namespace HouseholdManagementWebAPI.Controllers
 
 
             var bankAccount = Mapper.Map<BankAccount>(formdata);
-            bankAccount.HouseholdId = household.Id;            
+            bankAccount.HouseholdId = householdId;            
 
             household.BankAccounts.Add(bankAccount);
 
@@ -87,7 +119,7 @@ namespace HouseholdManagementWebAPI.Controllers
 
             var model = Mapper.Map<BankAccountBindingModel>(bankAccount);
 
-            var link = "abc/abc/abc";
+            var link = Url.Link("GetBankAccountById", new { bankAccountId = bankAccount.Id, householdId = householdId});
 
             return Created(link, model);
         }
@@ -110,14 +142,16 @@ namespace HouseholdManagementWebAPI.Controllers
             {
                 return NotFound();
             }
-
-            bankAccount = Mapper.Map<BankAccount>(formdata);
+            
+            Mapper.Map(formdata, bankAccount);
 
             DbContext.SaveChanges();
 
             var model = Mapper.Map<BankAccountBindingModel>(bankAccount);
 
-            return Ok();
+            var link = Url.Link("GetBankAccountById", new { bankAccountId = bankAccount.Id, householdId = bankAccount.HouseholdId });
+
+            return Created(link, model);
         }
 
         // DELETE: api/BankAccounts/5
@@ -125,7 +159,7 @@ namespace HouseholdManagementWebAPI.Controllers
         [Route("{bankAccountId}")]
         public IHttpActionResult Delete(string bankAccountId)
         {
-            if (bankAccountId == null)
+            if(bankAccountId == null)
             {
                 return BadRequest("Please provide all the details");
             }
@@ -144,6 +178,8 @@ namespace HouseholdManagementWebAPI.Controllers
             {
                 return NotFound();
             }
+
+            //household.BankAccounts.Remove(bankAccount);
 
             DbContext.Transactions.RemoveRange(bankAccount.Transactions);
 
