@@ -53,7 +53,9 @@ namespace HouseholdManagementWebAPI.Controllers
                 return NotFound();
             }
 
-            return Ok(transaction);
+            var result = Mapper.Map<TransactionViewModel>(transaction);
+
+            return Ok(result);
         }
 
         // GET: api/Transactions/5
@@ -185,8 +187,8 @@ namespace HouseholdManagementWebAPI.Controllers
 
 
         [HttpPut]
-        [Route("VoidTransaction/{transactionId}")]
-        public IHttpActionResult VoidTransaction(string transactionId)
+        [Route("ToggleVoidTransaction/{transactionId}")]
+        public IHttpActionResult ToggleVoidTransaction(string transactionId)
         {
             if (transactionId == null)
             {
@@ -202,9 +204,16 @@ namespace HouseholdManagementWebAPI.Controllers
                 return NotFound();
             }
 
-            transaction.BankAccount.Balance -= transaction.Amount;
-
-            transaction.IsTransactionVoid = true;
+            if (transaction.IsTransactionVoid == false)
+            {
+                transaction.IsTransactionVoid = true;
+                transaction.BankAccount.Balance -= transaction.Amount;
+            }
+            else
+            {
+                transaction.IsTransactionVoid = false;
+                transaction.BankAccount.Balance += transaction.Amount;
+            }
             transaction.DateUpdated = DateTime.Now;
             
 

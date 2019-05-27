@@ -16,10 +16,12 @@ namespace HouseholdManagementWebAPI.Models.BindingModels
         public DateTime? DateUpdated { get; set; }
         public bool IsTransactionVoid { get; set; }
 
+        public string CategoryId { get; set; }
         public string CategoryName { get; set; }
 
+        public string BankAccountId { get; set; }
         public string BankAccountName { get; set; }
 
-        public string TransactionOwnerName { get; set; }
+        public string TransactionOwnerUserName { get; set; }
     }
 }

@@ -25,6 +25,7 @@ namespace HouseholdManagementWebAPI.App_Start
                 config.CreateMap<BankAccount, BindingModelForCreatingBankAccount>().ReverseMap();
                 config.CreateMap<BankAccountBindingModel, BankAccount>().ReverseMap();
                 config.CreateMap<Transaction, BindingModelForCreatingTransaction>().ReverseMap();
+                config.CreateMap<Transaction, AlternativeBindingModelForCreatingTransaction>().ReverseMap();
                 config.CreateMap<TransactionViewModel, Transaction>().ReverseMap();
             });
         }

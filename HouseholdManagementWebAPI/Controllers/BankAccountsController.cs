@@ -52,7 +52,7 @@ namespace HouseholdManagementWebAPI.Controllers
         }
 
         [HttpGet]
-        [Route("{householdId}/{bankAccountId}", Name = "GetBankAccountWithId")]
+        [Route("{householdId}/{bankAccountId}", Name = "GetBankAccountById")]
         public IHttpActionResult GetBankAccount(string householdId, string bankAccountId)
         {
             if (householdId == null || bankAccountId == null)
@@ -63,8 +63,7 @@ namespace HouseholdManagementWebAPI.Controllers
             var currentUserId = User.Identity.GetUserId();
             var currentUser = DbContext.Users.FirstOrDefault(p => p.Id == currentUserId);
 
-            var bankAccount = DbContext.BankAccounts
-                .FirstOrDefault(p => p.HouseholdId == householdId && p.Id == bankAccountId && p.Household.HouseholdOwnerId == currentUserId);                              
+            var bankAccount = DbContext.BankAccounts.FirstOrDefault(p => p.HouseholdId == householdId && p.Id == bankAccountId && p.Household.HouseholdOwnerId == currentUserId);    
             if (bankAccount == null)
             {
                 return NotFound();
@@ -82,15 +81,20 @@ namespace HouseholdManagementWebAPI.Controllers
         {
             var currentUserId = User.Identity.GetUserId();
 
-            var result = DbContext.Transactions
+            decimal? result = DbContext.Transactions
                     .Where(p => p.BankAccountId == bankAccountId && p.BankAccount.Household.HouseholdOwnerId == currentUserId && p.IsTransactionVoid == false)
-                    .Sum(p => p.Amount);                    
+                    .Sum(p => (decimal?)p.Amount);          
+            if(result == null)
+            {
+                return Unauthorized();
+            }
 
             return Ok(result);
         }
 
         // POST: api/BankAccounts
         [HttpPost]
+        [Route("{householdId}")]
         public IHttpActionResult Post(string householdId, BindingModelForCreatingBankAccount formdata)
         {
             if (householdId == null || formdata == null || !ModelState.IsValid)
