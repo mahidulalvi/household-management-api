@@ -16,6 +16,8 @@ using Microsoft.Owin.Security.OAuth;
 using HouseholdManagementWebAPI.Models;
 using HouseholdManagementWebAPI.Providers;
 using HouseholdManagementWebAPI.Results;
+using HouseholdManagementWebAPI.Models.Domain;
+using System.Linq;
 
 namespace HouseholdManagementWebAPI.Controllers
 {
@@ -25,6 +27,7 @@ namespace HouseholdManagementWebAPI.Controllers
     {
         private const string LocalLoginProvider = "Local";
         private ApplicationUserManager _userManager;
+        //private ApplicationDbContext DbContext { get; set; }
 
         public AccountController()
         {
@@ -35,6 +38,7 @@ namespace HouseholdManagementWebAPI.Controllers
         {
             UserManager = userManager;
             AccessTokenFormat = accessTokenFormat;
+            //DbContext = new ApplicationDbContext();
         }
 
         public ApplicationUserManager UserManager
@@ -337,8 +341,52 @@ namespace HouseholdManagementWebAPI.Controllers
                 return GetErrorResult(result);
             }
 
+            var confirmEmailToken = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
+            var encodedConfirmEmailToken = HttpUtility.UrlEncode(confirmEmailToken);
+            
+            await UserManager.SendEmailAsync(user.Id, "Confirm email", $"Please confirm your email for the household management app by clicking <a href='http://localhost:50948/ConfirmEmail?email={user.Email}&confirmEmailToken={encodedConfirmEmailToken}'>here</a>");
+
             return Ok();
         }
+
+
+        [AllowAnonymous]
+        [Route("ConfirmEmail")]
+        public async Task<IHttpActionResult> ConfirmEmail(ConfirmEmailBindingModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            
+            var user = await UserManager.FindByNameAsync(model.Email);
+            if (user == null)
+            {                
+                // Don't reveal that the user does not exist or is not confirmed
+
+                //Returning Ok() so unauthorized persons cannot guess if it is working or not
+                return Ok();
+            }
+
+            IdentityResult result;
+
+            if(await UserManager.IsEmailConfirmedAsync(user.Id))
+            {
+                return Ok("User email already confirmed");
+            }
+            else
+            {
+                result = await UserManager.ConfirmEmailAsync(user.Id, model.ConfirmEmailToken);
+            }
+
+            if(!result.Succeeded)
+            {
+                return GetErrorResult(result);
+            }
+
+            return Ok();                        
+        }
+
 
         // POST api/Account/RegisterExternal
         [OverrideAuthentication]
@@ -385,7 +433,7 @@ namespace HouseholdManagementWebAPI.Controllers
                 return BadRequest(ModelState);
             }            
 
-            var user = await UserManager.FindByNameAsync(model.Email);
+            var user = await UserManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
                 // Don't reveal that the user does not exist
@@ -394,9 +442,9 @@ namespace HouseholdManagementWebAPI.Controllers
 
             IdentityResult result = await UserManager.ResetPasswordAsync(user.Id, model.Code, model.Password);
 
-            if (result.Succeeded)
+            if (!result.Succeeded)
             {
-                return Ok();
+                return GetErrorResult(result);
             }
 
             return Ok();
@@ -411,7 +459,7 @@ namespace HouseholdManagementWebAPI.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await UserManager.FindByNameAsync(model.Email);
+                var user = await UserManager.FindByEmailAsync(model.Email);
                 if (user == null || !(await UserManager.IsEmailConfirmedAsync(user.Id)))
                 {
                     // Don't reveal that the user does not exist or is not confirmed
@@ -424,7 +472,7 @@ namespace HouseholdManagementWebAPI.Controllers
                 // Send an email with this link
                 string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
                 //var callbackUrl = Url.Link("ResetPasswordUrl", new { code = code });
-                await UserManager.SendEmailAsync(user.Id, "Reset Password", "Please reset your password by clicking <a href=\"" + $"\">here {code}</a>");
+                await UserManager.SendEmailAsync(user.Id, "Forgot Password Reset", $"Please reset your password by clicking <a href = 'http://localhost:50948/ForgotPasswordReset?code={HttpUtility.UrlEncode(code)}'>here</a>");
                 return Ok();
             }
 

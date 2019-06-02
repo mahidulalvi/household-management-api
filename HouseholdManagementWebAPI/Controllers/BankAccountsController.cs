@@ -75,19 +75,25 @@ namespace HouseholdManagementWebAPI.Controllers
         }
 
         // GET: api/BankAccounts/5
-        [HttpGet]
+        [HttpPost]
         [Route("{bankAccountId}/CalculateAccountBalance")]
         public IHttpActionResult CalculateAccountBalance(string bankAccountId)
         {
             var currentUserId = User.Identity.GetUserId();
 
-            decimal? result = DbContext.Transactions
-                    .Where(p => p.BankAccountId == bankAccountId && p.BankAccount.Household.HouseholdOwnerId == currentUserId && p.IsTransactionVoid == false)
-                    .Sum(p => (decimal?)p.Amount);          
-            if(result == null)
+            var bankAccount = DbContext.BankAccounts.FirstOrDefault(p => p.Id == bankAccountId && p.Household.HouseholdOwnerId == currentUserId);
+            if(bankAccount == null)
             {
-                return Unauthorized();
+                return BadRequest("No accounts on your name were found that matches this account number");
             }
+
+            bankAccount.Balance = DbContext.Transactions
+                    .Where(p => p.BankAccountId == bankAccountId && p.BankAccount.Household.HouseholdOwnerId == currentUserId && p.IsTransactionVoid == false)
+                    .Sum(p => (decimal?)p.Amount) ?? 0;
+
+            DbContext.SaveChanges();
+
+            var result = Mapper.Map<BankAccountBindingModel>(bankAccount);
 
             return Ok(result);
         }

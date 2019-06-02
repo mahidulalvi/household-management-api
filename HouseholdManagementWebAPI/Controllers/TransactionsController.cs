@@ -169,12 +169,20 @@ namespace HouseholdManagementWebAPI.Controllers
                 return NotFound();
             }
 
-            transaction.BankAccount.Balance -= transaction.Amount;
+            var category = DbContext.Categories.FirstOrDefault(p => p.Id == formdata.CategoryId && p.HouseholdId == transaction.BankAccount.HouseholdId);
+            if(category == null)
+            {
+                return NotFound();
+            }
+
+            if (!transaction.IsTransactionVoid)
+            {
+                transaction.BankAccount.Balance -= transaction.Amount;
+                transaction.BankAccount.Balance += formdata.Amount;
+            }
 
             Mapper.Map(formdata, transaction);
-            transaction.DateUpdated = DateTime.Now;
-
-            transaction.BankAccount.Balance += transaction.Amount;
+            transaction.DateUpdated = DateTime.Now;            
 
             DbContext.SaveChanges();
 

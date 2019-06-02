@@ -90,6 +90,17 @@ namespace HouseholdManagementWebAPI.Models
         public string Email { get; set; }
     }
 
+    public class ConfirmEmailBindingModel
+    {
+        [Required]
+        [EmailAddress]
+        [Display(Name = "Email")]
+        public string Email { get; set; }
+
+        [Required]
+        public string ConfirmEmailToken { get; set; }
+    }
+
     public class ForgotPasswordResetBindingModel
     {
         [Required]

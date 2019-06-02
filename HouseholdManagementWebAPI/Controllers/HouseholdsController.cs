@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using HouseholdManagementWebAPI.Models;
 using HouseholdManagementWebAPI.Models.BindingModels;
 using HouseholdManagementWebAPI.Models.Domain;
@@ -46,6 +47,22 @@ namespace HouseholdManagementWebAPI.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet]
+        [Route("GetHouseholds", Name = "GetAllHouseholds")]
+        public IHttpActionResult Get()
+        {            
+            var currentUserId = User.Identity.GetUserId();            
+
+            var households = DbContext.Households.Where(p => p.HouseholdMembers.Any(r => r.Id == currentUserId)).ProjectTo<HouseholdViewModelForFrontEnd>().ToList();
+            if (households == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(households);
+        }
+
 
         // POST: api/Households
         [HttpPost]
@@ -121,6 +138,7 @@ namespace HouseholdManagementWebAPI.Controllers
 
             var result = new HouseholdViewModelForFrontEnd
             {
+                Id = household.Id,
                 Name = household.Name,
                 DateCreated = household.DateCreated,
                 DateUpdated = household.DateUpdated,
@@ -137,7 +155,7 @@ namespace HouseholdManagementWebAPI.Controllers
                 }).ToList()                
             };
 
-            return Ok(result);
+            return Ok(result1);
         }
 
         // DELETE: api/Households/5

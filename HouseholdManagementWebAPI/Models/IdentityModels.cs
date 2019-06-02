@@ -64,7 +64,7 @@ namespace HouseholdManagementWebAPI.Models
 
         public DbSet<BankAccount> BankAccounts { get; set; }
 
-        public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<Transaction> Transactions { get; set; }        
 
         public static ApplicationDbContext Create()
         {

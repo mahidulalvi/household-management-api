@@ -152,11 +152,11 @@ namespace HouseholdManagementWebAPI.Controllers
         [Authorize]
         private async Task<IHttpActionResult> SendEmail(string userId, string householdName, string invitee, string operation, string inviteId)
         {
-            
+
             if (operation == "Invite")
             {                
-                await UserManager.SendEmailAsync(userId, $"Invitation from {invitee}", $"Greetings! {invitee} invited you to the household: {householdName}. Click " +
-                    $"<a href='#'>Here</a> to accept/decline. This is the id of the invitation {inviteId}");
+                var encodedInviteId = HttpUtility.UrlEncode(inviteId);
+                await UserManager.SendEmailAsync(userId, $"Invitation from {invitee}", $"Greetings! {invitee} invited you to the household: {householdName}. Click <a href='http://localhost:50948/HouseholdApiHouseholdMembers/JoinHousehold?inviteId={encodedInviteId}&householdName={householdName}'>Here</a> to accept/decline. This is the id of the invitation {inviteId}");
             }
             else
             {
