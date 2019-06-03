@@ -48,6 +48,29 @@ namespace HouseholdManagementWebAPI.Controllers
             return Ok(result);
         }
 
+
+        [HttpGet]
+        [Route("EditHousehold/{id}")]
+        public IHttpActionResult GetHouseholdForEdit(string id)
+        {
+            if (id == null)
+            {
+                return BadRequest("Please provide all the details");
+            }
+
+            var currentUserId = User.Identity.GetUserId();
+
+            var household = DbContext.Households.FirstOrDefault(p => p.Id == id && p.HouseholdOwnerId == currentUserId);
+            if (household == null)
+            {
+                return NotFound();
+            }
+
+            var result = Mapper.Map<HouseholdViewModelForFrontEnd>(household);
+
+            return Ok(result);
+        }
+
         [HttpGet]
         [Route("GetHouseholds", Name = "GetAllHouseholds")]
         public IHttpActionResult Get()
