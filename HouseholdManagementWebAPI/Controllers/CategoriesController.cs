@@ -49,6 +49,61 @@ namespace HouseholdManagementWebAPI.Controllers
             return Ok(result);
         }
 
+
+        [HttpGet]
+        [Route("{householdId}/Categories/{categoryId}", Name = "GetCategoryByIdAndHouseholdId")]
+        public IHttpActionResult GetACategory(string householdId, string categoryId)
+        {
+            if (householdId == null || categoryId == null)
+            {
+                return BadRequest("Please provide all the details");
+            }
+
+            var currentUserId = User.Identity.GetUserId();
+
+            var category = DbContext.Categories
+                .FirstOrDefault(p => p.HouseholdId == householdId && p.Household.HouseholdMembers.Any(r => r.Id == currentUserId) && p.Id == categoryId);                
+
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            var result = Mapper.Map<CategoryBindingModel>(category);
+
+            return Ok(result);
+        }
+
+
+
+
+        [HttpGet]
+        [Route("Categories/{categoryId}", Name = "GetCategoryForEdit")]
+        public IHttpActionResult GetCategoryForEdit(string categoryId)
+        {
+            if (categoryId == null)
+            {
+                return BadRequest("Please provide all the details");
+            }
+
+            var currentUserId = User.Identity.GetUserId();
+
+            var category = DbContext.Categories
+                .FirstOrDefault(p => p.Household.HouseholdOwnerId == currentUserId && p.Id == categoryId);
+
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            var result = Mapper.Map<CategoryBindingModel>(category);
+
+            return Ok(result);
+        }
+
+
+
+
         // POST: api/Categories
         [Route("CreateCategory/{householdId}")]
         public IHttpActionResult Post(string householdId, BindingModelForCreatingCategory formdata)
@@ -107,7 +162,9 @@ namespace HouseholdManagementWebAPI.Controllers
 
             DbContext.SaveChanges();
 
-            return Ok();
+            var result = Mapper.Map<CategoryBindingModel>(category);
+
+            return Ok(result);
         }
 
         // DELETE: api/Categories/5
@@ -125,9 +182,11 @@ namespace HouseholdManagementWebAPI.Controllers
             if(category == null)
             {
                 return NotFound();
-            }            
+            }
 
-            DbContext.Categories.Remove(category);
+            category.Transactions.Clear();
+
+            DbContext.Categories.Remove(category);            
 
             DbContext.SaveChanges();
 
