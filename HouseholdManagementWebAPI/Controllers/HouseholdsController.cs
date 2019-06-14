@@ -23,7 +23,29 @@ namespace HouseholdManagementWebAPI.Controllers
         public HouseholdsController()
         {
             DbContext = new ApplicationDbContext();
-        }        
+        }
+
+        [HttpGet]
+        [Route("IsUserHouseholdOwner/{householdId}")]
+        public IHttpActionResult IsUserHouseholdOwner(string householdId)
+        {
+            if(householdId == null)
+            {
+                return BadRequest("householdId required");
+            }
+
+            var currentUserId = User.Identity.GetUserId();
+
+            var household = DbContext.Households.FirstOrDefault(p => p.Id == householdId && p.HouseholdOwnerId == currentUserId);
+            if (household == null)
+            {
+                return NotFound();
+            }
+
+            return Ok();
+        }
+
+
 
         // GET: api/Households/5
         [HttpGet]
@@ -197,10 +219,20 @@ namespace HouseholdManagementWebAPI.Controllers
             if(household == null)
             {
                 return NotFound();
-            }            
+            }
 
+            foreach(var account in household.BankAccounts)
+            {
+                DbContext.Transactions.RemoveRange(account.Transactions);
+            }
+
+            DbContext.BankAccounts.RemoveRange(household.BankAccounts);
+            DbContext.Categories.RemoveRange(household.Categories);
+
+            DbContext.Invites.RemoveRange(household.ActiveInvites);
             //household.HouseholdMembers.Clear();
             DbContext.Households.Remove(household);
+
             DbContext.SaveChanges();
 
             return Ok();
