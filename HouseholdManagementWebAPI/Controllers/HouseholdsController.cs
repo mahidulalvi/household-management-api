@@ -93,7 +93,7 @@ namespace HouseholdManagementWebAPI.Controllers
         {
             if (formdata == null || !ModelState.IsValid)
             {
-                return BadRequest("Please provide the details of the household");
+                return BadRequest(ModelState);
             }
 
             var currentUserId = User.Identity.GetUserId();
@@ -140,7 +140,7 @@ namespace HouseholdManagementWebAPI.Controllers
         {
             if(id == null || formdata == null || !ModelState.IsValid)
             {
-                return BadRequest("Please provide all the details");
+                return BadRequest(ModelState);
             }
 
             var currentUserId = User.Identity.GetUserId();

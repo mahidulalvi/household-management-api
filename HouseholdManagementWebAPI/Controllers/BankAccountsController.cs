@@ -63,7 +63,7 @@ namespace HouseholdManagementWebAPI.Controllers
             var currentUserId = User.Identity.GetUserId();
             var currentUser = DbContext.Users.FirstOrDefault(p => p.Id == currentUserId);
 
-            var bankAccount = DbContext.BankAccounts.FirstOrDefault(p => p.HouseholdId == householdId && p.Id == bankAccountId && p.Household.HouseholdOwnerId == currentUserId);    
+            var bankAccount = DbContext.BankAccounts.FirstOrDefault(p => p.HouseholdId == householdId && p.Id == bankAccountId && p.Household.HouseholdMembers.Any(r => r.Id == currentUserId));    
             if (bankAccount == null)
             {
                 return NotFound();
@@ -74,8 +74,36 @@ namespace HouseholdManagementWebAPI.Controllers
             return Ok(result);
         }
 
+
+
+        [HttpGet]
+        [Route("Edit/{householdId}/{bankAccountId}", Name = "GetBankAccountForEdit")]
+        public IHttpActionResult GetBankAccountForEdit(string householdId, string bankAccountId)
+        {
+            if (householdId == null || bankAccountId == null)
+            {
+                return BadRequest("Please provide all the details");
+            }
+
+            var currentUserId = User.Identity.GetUserId();
+            var currentUser = DbContext.Users.FirstOrDefault(p => p.Id == currentUserId);
+
+            var bankAccount = DbContext.BankAccounts.FirstOrDefault(p => p.HouseholdId == householdId && p.Id == bankAccountId && p.Household.HouseholdOwnerId == currentUserId);
+            if (bankAccount == null)
+            {
+                return NotFound();
+            }
+
+            var result = Mapper.Map<BankAccountBindingModel>(bankAccount);
+
+            return Ok(result);
+        }
+
+
+
+
         // GET: api/BankAccounts/5
-        [HttpPost]
+        [HttpPut]
         [Route("{bankAccountId}/CalculateAccountBalance")]
         public IHttpActionResult CalculateAccountBalance(string bankAccountId)
         {
@@ -154,6 +182,7 @@ namespace HouseholdManagementWebAPI.Controllers
             }
             
             Mapper.Map(formdata, bankAccount);
+            bankAccount.DateUpdated = DateTime.Now;
 
             DbContext.SaveChanges();
 

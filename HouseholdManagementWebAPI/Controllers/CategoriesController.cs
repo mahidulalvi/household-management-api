@@ -108,9 +108,13 @@ namespace HouseholdManagementWebAPI.Controllers
         [Route("CreateCategory/{householdId}")]
         public IHttpActionResult Post(string householdId, BindingModelForCreatingCategory formdata)
         {
-            if(householdId == null || formdata == null || !ModelState.IsValid)
+            if (householdId == null)
             {
-                return BadRequest("Please provide all the details");
+                return BadRequest("householdId is required");
+            }
+            if (formdata == null || !ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
             }
 
             var currentUserId = User.Identity.GetUserId();

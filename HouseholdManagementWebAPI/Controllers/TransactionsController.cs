@@ -30,12 +30,25 @@ namespace HouseholdManagementWebAPI.Controllers
         [Route("{householdId}/{bankAccountId}")]
         public IHttpActionResult Get(string householdId, string bankAccountId)
         {
+            if(householdId == null)
+            {
+                return BadRequest("householdId is required");
+            }
+            if (bankAccountId == null)
+            {
+                return BadRequest("bankAccountId is required");
+            }
+
             var currentUserId = User.Identity.GetUserId();            
 
             var result = DbContext.Transactions
                     .Where(p => p.BankAccountId == bankAccountId && p.BankAccount.HouseholdId == householdId && p.BankAccount.Household.HouseholdMembers.Any(r => r.Id == currentUserId))
                     .ProjectTo<TransactionViewModel>()
                     .ToList();
+            if(result == null)
+            {
+                return NotFound();
+            }
 
             return Ok(result);
         }
@@ -44,6 +57,11 @@ namespace HouseholdManagementWebAPI.Controllers
         [Route("{transactionId}", Name = "GetTransactionById")]
         public IHttpActionResult GetATransaction(string transactionId)
         {
+            if(transactionId == null)
+            {
+                return BadRequest("transactionId is required");
+            }
+
             var currentUserId = User.Identity.GetUserId();
 
             var transaction = DbContext.Transactions
@@ -58,18 +76,48 @@ namespace HouseholdManagementWebAPI.Controllers
             return Ok(result);
         }
 
-        // GET: api/Transactions/5
-        //public IHttpActionResult(int id)
-        //{
-        //    return "value";
-        //}
+
+
+
+
+        //Get transaction for edit
+        [HttpGet]
+        [Route("Edit/{transactionId}", Name = "GetTransactionForEdit")]
+        public IHttpActionResult GetTransactionForEdit(string transactionId)
+        {
+            if (transactionId == null)
+            {
+                return BadRequest("transactionId is required");
+            }
+
+            var currentUserId = User.Identity.GetUserId();
+
+            var transaction = DbContext.Transactions
+                    .FirstOrDefault(p => p.Id == transactionId && (p.BankAccount.Household.HouseholdOwnerId == currentUserId || p.TransactionOwnerId == currentUserId));
+            if (transaction == null)
+            {
+                return NotFound();
+            }
+
+            var result = Mapper.Map<BindingModelForCreatingTransaction>(transaction);
+
+            return Ok(result);
+        }
 
         // POST: api/Transactions
         [HttpPost]
         [Route("{householdId}/{bankAccountId}")]
         public IHttpActionResult Post(string householdId, string bankAccountId, BindingModelForCreatingTransaction formdata)
         {
-            if (householdId == null || bankAccountId == null || formdata == null || !ModelState.IsValid)
+            if (householdId == null)
+            {
+                return BadRequest("householdId is required");
+            }
+            if (bankAccountId == null)
+            {
+                return BadRequest("bankAccountId is required");
+            }
+            if (formdata == null || !ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
@@ -112,7 +160,11 @@ namespace HouseholdManagementWebAPI.Controllers
         [Route("{householdId}")]
         public IHttpActionResult Post(string householdId, AlternativeBindingModelForCreatingTransaction formdata)
         {
-            if (householdId == null || formdata == null || !ModelState.IsValid)
+            if (householdId == null)
+            {
+                return BadRequest("householdId is required");
+            }
+            if (formdata == null || !ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
@@ -155,7 +207,11 @@ namespace HouseholdManagementWebAPI.Controllers
         [Route("{transactionId}")]
         public IHttpActionResult Put(string transactionId, BindingModelForCreatingTransaction formdata)
         {
-            if (transactionId == null || formdata == null || !ModelState.IsValid)
+            if (transactionId == null)
+            {
+                return BadRequest("transactionId is required");
+            }
+            if (formdata == null || !ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
