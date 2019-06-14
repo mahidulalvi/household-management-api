@@ -25,6 +25,27 @@ namespace HouseholdManagementWebAPI.Controllers
         }
 
 
+        [HttpGet]
+        [Route("IsUserTransactionOwner/{transactionId}")]
+        public IHttpActionResult IsUserTransactionOwner(string transactionId)
+        {
+            if (transactionId == null)
+            {
+                return BadRequest("transactionId required");
+            }
+
+            var currentUserId = User.Identity.GetUserId();
+
+            var transaction = DbContext.Transactions.FirstOrDefault(p => p.Id == transactionId && (p.TransactionOwnerId == currentUserId || p.BankAccount.Household.HouseholdOwnerId == currentUserId));
+            if (transaction == null)
+            {
+                return NotFound();
+            }
+
+            return Ok();
+        }
+
+
         // GET: api/Transactions
         [HttpGet]
         [Route("{householdId}/{bankAccountId}")]
