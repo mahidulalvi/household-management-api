@@ -97,8 +97,6 @@ namespace HouseholdManagementAPI.Controllers
         }
 
 
-
-
         // GET: api/BankAccounts/5
         [HttpPut]
         [Route("{bankAccountId}/CalculateAccountBalance")]
