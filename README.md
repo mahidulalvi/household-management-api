@@ -2,7 +2,7 @@
 
 Household Management API is household budget management backend application which gives us the endpoints for managing our ['Household Manager'](https://github.com/mahidulalvi/household-manager) application. It is built using C# and the ASP.NET framework's Web API template. 
 
-The project requirements are sourced from `Coder Foundry`.
+The project requirements are sourced from `Coder Foundry`. This project was originally completed on June 14, 2019.
 
 
 ## logic
@@ -47,4 +47,4 @@ Now the project can be run using `F5`(for debugging) or `CTRL + F5` for running 
 
 ## project requirements
 
-For anyone intersted, the project specific requirements can be found ['here'](./Coder Foundry - Project Requirements.docx.pdf).
+For anyone intersted, the project specific requirements can be found [here](./CoderFoundryProjectRequirements.docx.pdf).
