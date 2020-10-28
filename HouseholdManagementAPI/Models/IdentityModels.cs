@@ -51,7 +51,7 @@ namespace HouseholdManagementAPI.Models
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext()
-            : base("DefaultConnection", throwIfV1Schema: false)
+            : base("DBConnectionString", throwIfV1Schema: false)
         {
         }
 
